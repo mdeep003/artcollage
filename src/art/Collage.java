@@ -1,6 +1,11 @@
 package art;
 
 import java.awt.Color;
+import java.awt.Image;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 /*
  * This class contains methods to create and perform operations on a collage of images.
@@ -40,7 +45,21 @@ public class Collage {
      */
     public Collage (String filename) {
 
-        // WRITE YOUR CODE HERE
+
+
+        collageDimension = 4;
+        tileDimension = 150; 
+
+        originalPicture =new Picture(filename);
+
+        collagePicture =new Picture((tileDimension*collageDimension),(tileDimension*collageDimension));
+
+
+        scale(originalPicture, collagePicture);
+
+        
+
+        
     }
 
     /*
@@ -55,7 +74,16 @@ public class Collage {
      */    
     public Collage (String filename, int td, int cd) {
 
-        // WRITE YOUR CODE HERE
+        this.collageDimension=cd;
+        this.tileDimension=td;
+        int widthtotal = cd*td;
+
+
+        originalPicture=new Picture(filename);
+        collagePicture =new Picture(widthtotal, widthtotal);
+
+
+        scale(originalPicture, collagePicture);
     }
 
 
@@ -69,7 +97,26 @@ public class Collage {
      */
     public static void scale (Picture source, Picture target) {
 
-        // WRITE YOUR CODE HERE
+        
+
+        int w=target.width(); 
+        int h=target.height();
+        
+
+        for(int col = 0; col<w;col++)
+        {
+            for(int rol=0;rol<h;rol++)
+            {
+                int colcheck = col*source.width()/w;
+                int rolcheck = rol * source.height()/h;
+                Color color = source.get(colcheck, rolcheck);
+                target.set(col,rol,color);
+            }
+            target.show();
+
+        }
+
+        
     }
 
      /*
@@ -133,7 +180,27 @@ public class Collage {
      */    
     public void makeCollage () {
 
-        // WRITE YOUR CODE HERE
+        Picture scaledOriginal = new Picture(tileDimension, tileDimension);
+        scale(originalPicture, scaledOriginal);
+
+     
+        for (int i = 0; i < collagePicture.height()/tileDimension; i++) {
+            for (int j = 0; j < collagePicture.height()/tileDimension; j++) {
+                  
+                for(int k=0;k<scaledOriginal.height();k++)
+                    {
+                        for(int m=0;m<scaledOriginal.height();m++)
+                        {
+                            Color color =scaledOriginal.get(k, m);
+                            collagePicture.set(k+(i*tileDimension), m+(j*tileDimension) ,color);
+                        }
+                    }
+
+                    
+                
+            }
+
+        }
     }
 
     /*
@@ -147,7 +214,37 @@ public class Collage {
      */
     public void colorizeTile (String component,  int collageCol, int collageRow) {
 
-        // WRITE YOUR CODE HERE
+        for( int i = 0; i < collagePicture.height()/tileDimension; i++) 
+        {
+            for (int j = 0; j < collagePicture.height()/tileDimension; j++) 
+            {
+                if ( j == collageCol && i == collageRow ) 
+                {    
+                    for (int pixelRow = 0; pixelRow < tileDimension ; pixelRow++) 
+                    {
+                        for (int pixelCol = 0; pixelCol < tileDimension; pixelCol++) 
+                        {
+                            Color color = collagePicture.get(pixelCol + (tileDimension * j), pixelRow + (tileDimension * i));
+                            int red = color.getRed();
+                            int green = color.getGreen();
+                            int blue = color.getBlue();
+                                if(component.equals("red")) 
+                                {
+                                    collagePicture.set(pixelCol + (tileDimension * j), pixelRow + (tileDimension * i), new Color(red, 0, 0));
+                                }
+                                else if(component.equals("green")) 
+                                {
+                                    collagePicture.set(pixelCol + (tileDimension * j), pixelRow + (tileDimension * i), new Color(0, green, 0));
+                                }
+                                else if(component.equals("blue"))
+                                {
+                                    collagePicture.set(pixelCol + (tileDimension * j), pixelRow + (tileDimension * i), new Color(0, 0, blue));
+                                }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /*
@@ -160,7 +257,34 @@ public class Collage {
      */
     public void replaceTile (String filename,  int collageCol, int collageRow) {
 
-        // WRITE YOUR CODE HERE
+
+
+        Picture replace = new Picture(filename);
+        Picture replacescale= new Picture(tileDimension, tileDimension);
+
+        scale(replace, replacescale);
+
+        for(int i = 0; i< collagePicture.height()/tileDimension; i++) {
+            for(int j = 0; j< collagePicture.height()/tileDimension; j++) {
+                if ( j == collageRow && i == collageCol ) {
+
+
+
+                    for(int k=0;k<replacescale.height();k++)
+                    {
+                        for(int m=0;m<replacescale.height();m++)
+                        {
+                            Color color =replacescale.get(k, m);
+                            collagePicture.set(k+(i*tileDimension), m+(j*tileDimension), color);
+                        }
+                    }
+
+
+
+                    
+                }
+            }
+        }
     }
 
     /*
@@ -171,7 +295,21 @@ public class Collage {
      */
     public void grayscaleTile (int collageCol, int collageRow) {
 
-        // WRITE YOUR CODE HERE
+        for( int i = 0; i < collagePicture.height()/tileDimension; i++) {
+            for (int j = 0; j < collagePicture.height()/tileDimension; j++) {
+                if ( j == collageCol && i == collageRow ) {
+                    //Picture pictureTile = new Picture(i,j);
+                    for (int prow = 0; prow < tileDimension ; prow++) {
+
+                        for (int pcol = 0; pcol < tileDimension; pcol++) {
+                            Color color = collagePicture.get(pcol + (tileDimension * j), prow + (tileDimension * i));
+                            Color gray = toGray(color); 
+                            collagePicture.set(pcol + (tileDimension * j), prow + (tileDimension * i), gray);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
